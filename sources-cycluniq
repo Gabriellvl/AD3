@@ -3,3 +3,6 @@ include/trie.h
 include/cyclic.h
 include/searchtree.h
 src/main.c
+src/hashtable.c
+src/trie.c
+src/searchtree.c

@@ -3,6 +3,7 @@
 //
 
 #include "../include/hashtable.h"
+#include "../include/utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -87,7 +88,7 @@ bool hashtable_add(HashTable *table, const char *key) {
     }
 
     // Voeg de sleutel toe aan de bucket
-    bucket->keys[bucket->num_keys++] = strdup(key);
+    bucket->keys[bucket->num_keys++] = my_strdup(key);
     table->num_entries++;
     return true;
 }

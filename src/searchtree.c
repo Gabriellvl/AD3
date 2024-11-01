@@ -3,6 +3,7 @@
 //
 
 #include "../include/searchtree.h"
+#include "../include/utils.h"
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,7 +31,7 @@ bool is_red(Node* node) {
 // Helper function to create a new node with is_red initialized
 Node* searchtree_create_node(const char* key, Color color, Node* parent) {
     Node* node = malloc(sizeof(Node));
-    node->key = strdup(key);  // Duplicate the key
+    node->key = my_strdup(key);  // Duplicate the key
     node->color = color;
     node->left = NULL;
     node->right = NULL;
