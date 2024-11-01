@@ -63,11 +63,3 @@ char* lexicographically_minimal_string_rotation(const char *input) {
     return rotation;
 }
 
-// Test de functie
-int main2() {
-    char test_string[] = "snel";
-    printf("Originele string: %s\n", test_string);
-    lexicographically_minimal_string_rotation(test_string);
-    printf("Lexicografisch minimale rotatie: %s\n", test_string);
-    return 0;
-}
