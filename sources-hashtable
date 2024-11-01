@@ -1,2 +1,4 @@
+include/utils.h
 include/hashtable.h
+src/utils.c
 src/hashtable.c
