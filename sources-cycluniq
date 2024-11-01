@@ -7,4 +7,5 @@ src/utils.c
 src/main.c
 src/hashtable.c
 src/trie.c
+src/cyclic.c
 src/searchtree.c
