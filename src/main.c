@@ -46,6 +46,7 @@ int main(int argc, char* argv[]) {
         char *result = lexicographically_minimal_string_rotation(line);
         strcpy(minimal_rotation, result);
 
+        free(result);
 
         // Check if the minimal rotation has already been seen
         if (!search_in_datastructure(structure, minimal_rotation, datastructuur)) {
