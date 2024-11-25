@@ -25,6 +25,7 @@ struct HashTable
 };
 
 void hashtable_resize(HashTable* table);
+void resize_bucket(struct Bucket* bucket);
 
 HashTable* hashtable_init()
 {
@@ -134,36 +135,6 @@ bool hashtable_search(const HashTable *table, const char *key) {
     return false;  // Sleutel niet gevonden
 }
 
-// Testprogramma
-int main3() {
-    HashTable *table = hashtable_init();
-
-    // Voeg een paar strings toe
-    hashtable_add(table, "meetsysteem");
-    hashtable_add(table, "kadering");
-    hashtable_add(table, "schildpadsoep");
-    hashtable_add(table, "ringkade");
-    hashtable_add(table, "ree");
-    hashtable_add(table, "eer");
-    hashtable_add(table, "pakketbom");
-    hashtable_add(table, "parterretrap");
-    hashtable_add(table, "bompakket");
-    hashtable_add(table, "ere");
-    hashtable_add(table, "soepschildpad");
-
-    // Test hashtable_search
-    printf("Zoekresultaten:\n");
-    printf("Zoek naar 'ree': %s\n", hashtable_search(table, "ree") ? "Gevonden" : "Niet gevonden");
-    printf("Zoek naar 'onbestaand': %s\n", hashtable_search(table, "onbestaand") ? "Gevonden" : "Niet gevonden");
-
-    // Print de grootte van de hashtable
-    printf("Totaal aantal entries: %zu\n", hashtable_size(table));
-
-    // Vrijgeven van de hashtable
-    hashtable_free(table);
-
-    return 0;
-}
 
 
 

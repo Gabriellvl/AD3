@@ -3,108 +3,189 @@
 //
 
 #include "../include/trie.h"
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
+// Node structure for the compressed trie
 typedef struct TrieNode {
-    char character;
-    bool is_leaf;
-    struct TrieNode *left;
-    struct TrieNode *middle;
-    struct TrieNode *right;
+    char *substring;              // Compressed string for the node
+    struct TrieNode **children;   // Dynamic array of children
+    bool is_leaf;                 // Indicates if this node represents the end of a word
+    size_t num_children;          // Number of children
+    size_t capacity;              // Capacity of the children array
 } TrieNode;
 
+// Main trie structure
 struct Trie {
-    TrieNode *root;
-    size_t size;
+    TrieNode *root;   // Root node of the trie
+    size_t size;      // Total number of words in the trie
 };
 
-// Function to create a new trie node
-TrieNode* trie_create_node(char character) {
-    TrieNode* node = malloc(sizeof(TrieNode));
-    node->character = character;
+// Helper function to create a new trie node
+TrieNode *trie_create_node(const char *substring) {
+    TrieNode *node = malloc(sizeof(TrieNode));
+    if (!node) {
+        fprintf(stderr, "Memory allocation failed for TrieNode\n");
+        exit(EXIT_FAILURE);
+    }
+
+    node->substring = substring ? strdup(substring) : NULL;
+    node->children = NULL;
     node->is_leaf = false;
-    node->left = node->middle = node->right = NULL;
+    node->num_children = 0;
+    node->capacity = 0;
+
     return node;
 }
 
-// Initialize the trie
-Trie* trie_init() {
-    Trie* trie = malloc(sizeof(Trie));
-    trie->root = NULL;
+// Helper function to free a trie node and its children recursively
+void trie_free_node(TrieNode *node) {
+    if (!node) return;
+
+    free(node->substring);
+
+    for (size_t i = 0; i < node->num_children; i++) {
+        trie_free_node(node->children[i]);
+    }
+
+    free(node->children);
+    free(node);
+}
+
+// Initialize a new compressed trie
+Trie *trie_init() {
+    Trie *trie = malloc(sizeof(Trie));
+    if (!trie) {
+        fprintf(stderr, "Memory allocation failed for Trie\n");
+        exit(EXIT_FAILURE);
+    }
+
+    trie->root = trie_create_node(NULL);
     trie->size = 0;
+
     return trie;
 }
 
-// Recursive helper function to add a word to the trie
-void trie_add_recursive(TrieNode **root, const char *word, Trie *trie) {
-    if (!*root) *root = trie_create_node(*word);
-
-    if (*word < (*root)->character) {
-        trie_add_recursive(&(*root)->left, word, trie);
-    } else if (*word > (*root)->character) {
-        trie_add_recursive(&(*root)->right, word, trie);
-    } else {
-        if (*(word + 1) == '\0') {
-            if (!(*root)->is_leaf) {  // Only increase size if it's a new word
-                (*root)->is_leaf = true;
-                trie->size++;
-            }
-        } else {
-            trie_add_recursive(&(*root)->middle, word + 1, trie);
-        }
+// Helper function to find the longest common prefix
+size_t trie_longest_common_prefix(const char *a, const char *b) {
+    size_t i = 0;
+    while (a[i] && b[i] && a[i] == b[i]) {
+        i++;
     }
+    return i;
 }
 
-// Public function to add a word to the trie
-bool trie_add(Trie *trie, const char *word) {
-    if (!trie || !word || trie_search(trie, word))
-        return false;
+// Helper function to add a child to a node
+void trie_add_child(TrieNode *parent, TrieNode *child) {
+    if (parent->num_children == parent->capacity) {
+        size_t new_capacity = parent->capacity == 0 ? 4 : parent->capacity * 2;
+        parent->children = realloc(parent->children, new_capacity * sizeof(TrieNode *));
+        if (!parent->children) {
+            fprintf(stderr, "Memory reallocation failed for children array\n");
+            exit(EXIT_FAILURE);
+        }
+        parent->capacity = new_capacity;
+    }
 
-    trie_add_recursive(&trie->root, word, trie);
+    parent->children[parent->num_children++] = child;
+}
+
+// Recursive helper function to add a word to the trie
+bool trie_add_recursive(TrieNode *node, const char *key) {
+    if (!*key) {  // If the key is empty, mark the node as a leaf
+        if (!node->is_leaf) {
+            node->is_leaf = true;
+            return true;
+        }
+        return false;
+    }
+
+    // Traverse through children to find a match
+    for (size_t i = 0; i < node->num_children; i++) {
+        TrieNode *child = node->children[i];
+        size_t prefix_length = trie_longest_common_prefix(key, child->substring);
+
+        if (prefix_length > 0) {
+            if (prefix_length == strlen(child->substring)) {
+                // Continue adding to the matching child
+                return trie_add_recursive(child, key + prefix_length);
+            }
+            // Split the child node
+            TrieNode *split_node = trie_create_node(child->substring + prefix_length);
+            split_node->children = child->children;
+            split_node->num_children = child->num_children;
+            split_node->capacity = child->capacity;
+            split_node->is_leaf = child->is_leaf;
+
+            child->substring = strndup(child->substring, prefix_length);
+            child->children = NULL;
+            child->num_children = 0;
+            child->capacity = 0;
+            child->is_leaf = false;
+
+            trie_add_child(child, split_node);
+            TrieNode *new_child = trie_create_node(key + prefix_length);
+            new_child->is_leaf = true;
+            trie_add_child(child, new_child);
+
+            return true;
+        }
+    }
+
+    // If no match, create a new child
+    TrieNode *new_child = trie_create_node(key);
+    new_child->is_leaf = true;
+    trie_add_child(node, new_child);
+
     return true;
 }
 
+// Add a word to the trie
+bool trie_add(Trie *trie, const char *key) {
+    if (!trie || !key) return false;
+
+    if (trie_add_recursive(trie->root, key)) {
+        trie->size++;
+        return true;
+    }
+    return false;
+}
+
 // Recursive helper function to search for a word in the trie
-bool trie_search_recursive(TrieNode *root, const char *word) {
-    if (!root) return false;
+bool trie_search_recursive(const TrieNode *node, const char *key) {
+    if (!*key) return node->is_leaf;
 
-    if (*word < root->character)
-        return trie_search_recursive(root->left, word);
+    for (size_t i = 0; i < node->num_children; i++) {
+        const TrieNode *child = node->children[i];
+        size_t prefix_length = trie_longest_common_prefix(key, child->substring);
 
-    if (*word > root->character)
-        return trie_search_recursive(root->right, word);
+        if (prefix_length == strlen(child->substring)) {
+            return trie_search_recursive(child, key + prefix_length);
+        }
+    }
 
-    if (*(word + 1) == '\0')
-        return root->is_leaf;
-
-    return trie_search_recursive(root->middle, word + 1);
+    return false;
 }
 
-// Public function to search for a word in the trie
-bool trie_search(const Trie *trie, const char *word) {
-    if (!trie || !word) return false;
-    return trie_search_recursive(trie->root, word);
+// Search for a word in the trie
+bool trie_search(const Trie *trie, const char *key) {
+    if (!trie || !key) return false;
+
+    return trie_search_recursive(trie->root, key);
 }
 
-// Recursive helper function to free nodes
-void trie_free_recursive(TrieNode *root) {
-    if (!root) return;
-    trie_free_recursive(root->left);
-    trie_free_recursive(root->middle);
-    trie_free_recursive(root->right);
-    free(root);
-}
-
-// Public function to free the trie
+// Free the trie and its nodes
 void trie_free(Trie *trie) {
     if (!trie) return;
-    trie_free_recursive(trie->root);
+
+    trie_free_node(trie->root);
     free(trie);
 }
 
-// Public function to get the number of words in the trie
+// Get the size of the trie
 size_t trie_size(Trie *trie) {
-    if (!trie) return 0;
-    return trie->size;
+    return trie ? trie->size : 0;
 }
+

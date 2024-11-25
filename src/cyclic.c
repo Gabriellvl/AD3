@@ -1,65 +1,106 @@
 //
-// Created by Gabriel Van Langenhove on 09/10/2024.
+// Created by Gabriel Van Langenhove on 25/11/2024.
 //
 
-#include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdint.h>
+#include <stdio.h>
 
-// Functie voor het vinden van de lexicografisch kleinste rotatie met Booth's Algorithm
-int booth(const char *s) {
-    const int n = strlen(s);
-    char doubled[2 * n + 1]; // Maak een dubbele string s + s
-    strcpy(doubled, s);
-    strcat(doubled, s);
+// Compare two substrings lexicographically using 64-bit words
+int compare_words(const char* s1, const char* s2, size_t len) {
+    size_t i = 0;
 
-    int f[2 * n];  // Array om "failure links" bij te houden
-    memset(f, -1, sizeof(f));  // Initialiseer de array met -1
+    while (i + 8 <= len) {
+        // Read 64-bit chunks from both substrings
+        uint64_t word1 = *(const uint64_t*)(s1 + i);
+        uint64_t word2 = *(const uint64_t*)(s2 + i);
 
-    int k = 0;  // Index van de lexicografisch kleinste rotatie
-    for (int j = 1; j < 2 * n; j++) {
-        int sj = doubled[j];
-        int i = f[j - k - 1];
+        // If the chunks are different, find the exact byte difference
+        if (word1 != word2) {
+            uint64_t diff = word1 ^ word2; // XOR to identify differing bits
 
-        // Zoek naar de juiste plek om te vergelijken
-        while (i != -1 && sj != doubled[k + i + 1]) {
-            if (sj < doubled[k + i + 1]) {
-                k = j - i - 1;
-            }
-            i = f[i];
+            // Find the first differing byte
+            size_t differing_byte = __builtin_ctzll(diff) / 8;
+
+            // Extract the differing byte from each word
+            unsigned char c1 = (word1 >> (differing_byte * 8)) & 0xFF;
+            unsigned char c2 = (word2 >> (differing_byte * 8)) & 0xFF;
+
+            // Return the comparison result
+            return (c1 < c2) ? -1 : 1;
         }
+        i += 8; // Move to the next 64-bit block
+    }
 
-        // Update de failure link
-        if (sj != doubled[k + i + 1]) {
-            if (sj < doubled[k]) {
-                k = j;
-            }
-            f[j - k] = -1;
-        } else {
-            f[j - k] = i + 1;
+    // Compare any remaining bytes one by one
+    while (i < len) {
+        if (s1[i] < s2[i]) return -1;
+        if (s1[i] > s2[i]) return 1;
+        i++;
+    }
+
+    return 0; // Substrings are equal
+}
+
+char* double_string(const char* input, size_t len) {
+    char* doubled = (char*)malloc(len * 2 + 1); // +1 for null terminator
+    if (!doubled)
+        return NULL;
+
+    strcpy(doubled, input);
+    strcat(doubled, input);
+
+    return doubled;
+}
+
+size_t find_min_rotation(const char* doubled, size_t len) {
+    size_t min_start = 0;
+
+    for (size_t i = 1; i < len; i++) {
+        // Compare the current rotation with the smallest found so far
+        int cmp = compare_words(doubled + i, doubled + min_start, len);
+
+        if (cmp < 0) {
+            min_start = i;
         }
     }
 
-    return k;
+    return min_start; // Return the starting index of the minimal rotation
 }
 
-char* lexicographically_minimal_string_rotation(const char *input) {
-    const int len = strlen(input);
-    const int min_index = booth(input);
 
-    // Dynamically allocate memory for the result
-    char *rotation = (char*)malloc((len + 1) * sizeof(char));
-    if (rotation == NULL) {
+char* lexicographically_minimal_string_rotation(const char* input) {
+    if (!input || input[0] == '\0') {
+        return strdup("");
+    }
+
+    size_t len = strlen(input);
+
+    // Double the input string to simulate all rotations
+    char* doubled = double_string(input, len);
+    if (!doubled)
+    {
         fprintf(stderr, "Memory allocation failed\n");
         exit(1);
     }
 
-    // Create the smallest rotation
-    for (int i = 0; i < len; i++) {
-        rotation[i] = input[(min_index + i) % len];
-    }
-    rotation[len] = '\0';  // Null-terminate the string
 
+    size_t min_start = find_min_rotation(doubled, len);
+
+    // Step 3: Create the resulting minimal rotation string
+    char* rotation = malloc(len + 1);
+    if (!rotation) {
+        free(doubled); // Free the doubled string if result allocation fails
+        fprintf(stderr, "Memory allocation failed\n");
+        exit(1);
+    }
+
+    // Copy the minimal rotation into the result buffer
+    strncpy(rotation, doubled + min_start, len);
+    rotation[len] = '\0'; // Null-terminate the string
+
+    free(doubled);
     return rotation;
 }
 

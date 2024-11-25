@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     const char* datastructuur = argv[1];
     void* structure = init_datastructure(datastructuur);
 
-    if (!structure) {
+    if (structure == NULL) {
         fprintf(stderr, "Failed to initialize the data structure\n");
         return 1;
     }
@@ -75,7 +75,7 @@ void* init_datastructure(const char* type) {
         return searchtree_init();
     }
 
-    fprintf(stderr, "Unknown data structure type: %s\n", type);
+    fprintf(stderr, "Unknown data structure type: %s\nInside init struct", type);
     return NULL;
 }
 
@@ -90,7 +90,7 @@ bool add_to_datastructure(void* ds, const char* key, const char* type) {
     if (strcmp(type, "searchtree") == 0) {
         return searchtree_add((SearchTree*)ds, key);
     }
-    fprintf(stderr, "Unknown data structure type: %s\n", type);
+    fprintf(stderr, "Unknown data structure type: %s\nFailed to add to struct", type);
     return false;
 }
 
@@ -105,7 +105,7 @@ bool search_in_datastructure(const void* ds, const char* key, const char* type) 
     if (strcmp(type, "searchtree") == 0) {
         return searchtree_search((const SearchTree*)ds, key);
     }
-    fprintf(stderr, "Unknown data structure type: %s\n", type);
+    fprintf(stderr, "Unknown data structure type: %s\nFailed to search in struct", type);
     return false;
 }
 
@@ -114,11 +114,14 @@ void free_datastructure(void* ds, const char* type) {
     if (strcmp(type, "hashtable") == 0) {
         hashtable_free(ds);
     }
-    if (strcmp(type, "trie") == 0) {
+    else if (strcmp(type, "trie") == 0) {
         trie_free(ds);
     }
-    if (strcmp(type, "searchtree") == 0) {
-        searchtree_free((SearchTree*)ds);
+    else if (strcmp(type, "searchtree") == 0) {
+        searchtree_free(ds);
+    } else
+    {
+        fprintf(stderr, "Unknown data structure type: %s\nFailed to free struct", type);
     }
-    fprintf(stderr, "Unknown data structure type: %s\n", type);
+
 }
