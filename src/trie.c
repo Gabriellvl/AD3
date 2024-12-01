@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "utils.h"
+
 // Node structure for the compressed trie
 typedef struct TrieNode {
     char *substring;              // Compressed string for the node
@@ -31,7 +33,7 @@ TrieNode *trie_create_node(const char *substring) {
         exit(EXIT_FAILURE);
     }
 
-    node->substring = substring ? strdup(substring) : NULL;
+    node->substring = substring ? my_strdup(substring) : NULL;
     node->children = NULL;
     node->is_leaf = false;
     node->num_children = 0;
