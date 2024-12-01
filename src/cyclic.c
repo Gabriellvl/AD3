@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#include "utils.h"
+#include "../include/utils.h"
 
 // Compare two substrings lexicographically using 64-bit words
 int compare_words(const char* s1, const char* s2, size_t len) {

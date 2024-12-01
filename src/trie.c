@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "utils.h"
+#include "../include/utils.h"
 
 // Node structure for the compressed trie
 typedef struct TrieNode {
