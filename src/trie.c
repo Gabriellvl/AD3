@@ -121,7 +121,15 @@ bool trie_add_recursive(TrieNode *node, const char *key) {
             split_node->capacity = child->capacity;
             split_node->is_leaf = child->is_leaf;
 
-            child->substring = strndup(child->substring, prefix_length);
+            free(child->substring);
+            child->substring = malloc(prefix_length + 1);
+            if (!child->substring) {
+                fprintf(stderr, "Memory allocation failed for split substring\n");
+                exit(EXIT_FAILURE);
+            }
+            memcpy(child->substring, key, prefix_length);
+            child->substring[prefix_length] = '\0';
+
             child->children = NULL;
             child->num_children = 0;
             child->capacity = 0;
