@@ -96,7 +96,7 @@ void trie_add_child(TrieNode *parent, TrieNode *child) {
 
 // Recursive helper function to add a word to the trie
 bool trie_add_recursive(TrieNode *node, const char *key) {
-    if (!*key) {  // If the key is empty, mark the node as a leaf
+    if (!key || !*key) {  // If the key is empty, mark the node as a leaf
         if (!node->is_leaf) {
             node->is_leaf = true;
             return true;
