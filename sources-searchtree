@@ -1,4 +1,2 @@
-include/utils.h
-include/searchtree.h
 src/utils.c
 src/searchtree.c

@@ -1,4 +1,2 @@
-include/cyclic.h
-include/utils.h
 src/cyclic.c
 src/utils.c

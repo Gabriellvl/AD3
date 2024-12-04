@@ -1,4 +1,2 @@
-include/trie.h
 src/trie.c
-include/utils.h
 src/utils.c

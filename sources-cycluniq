@@ -1,11 +1,7 @@
-include/utils.h
-include/hashtable.h
-include/trie.h
-include/cyclic.h
-include/searchtree.h
 src/utils.c
 src/main.c
 src/hashtable.c
 src/trie.c
 src/cyclic.c
 src/searchtree.c
+src/struct_utils.c
