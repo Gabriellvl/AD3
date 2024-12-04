@@ -1,10 +1,10 @@
 #include "../include/cyclic.h"
+#include "../include//utils.h"
 #include "../include/struct_utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <utils.h>
 
 #define MAX_LINE_LENGTH 4096
 #define BATCH_SIZE 250 // 250 * 4097 = 1 024 250; < 1 048  576 = 1 MiB
