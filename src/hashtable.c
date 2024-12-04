@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITIAL_SIZE 8
-#define BUCKET_CAPACITY 4
+#define INITIAL_SIZE 1024
+#define BUCKET_CAPACITY 64
 
 struct Bucket
 {
@@ -61,7 +61,12 @@ size_t hashtable_size(HashTable *table) {
 }
 
 // djb2 hashfunctie
+// http://www.cse.yorku.ca/~oz/hash.html
 unsigned int hash(const char *key) {
+    if (key == NULL || strlen(key) == 0)
+    {
+        return 0;
+    }
     unsigned int hashval = 5381;
     int c;
     while ((c = *key++)) {
@@ -76,7 +81,7 @@ unsigned int get_bucket_index(HashTable *table, const char *key) {
 }
 
 bool hashtable_add(HashTable *table, const char *key) {
-    if (hashtable_search(table, key))
+    if (key == NULL || hashtable_search(table, key))
         return false;  // Sleutel bestaat al, voeg niet opnieuw toe
 
     unsigned int index = get_bucket_index(table, key);
@@ -123,6 +128,9 @@ void hashtable_resize(HashTable *table) {
 }
 
 bool hashtable_search(const HashTable *table, const char *key) {
+    if (key == NULL)
+        return false;
+
     unsigned int index = get_bucket_index((HashTable *)table, (char *)key);
     struct Bucket *bucket = table->buckets[index];
 

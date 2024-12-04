@@ -9,7 +9,7 @@
 char* my_strdup(const char* s) {
     // Calculate the length of the string and allocate enough memory
     size_t len = strlen(s) + 1;  // +1 for the null terminator
-    char* duplicate = (char*)malloc(len * sizeof(char));
+    char* duplicate = malloc(len * sizeof(char));
 
     if (duplicate == NULL) {
         return NULL; // Return NULL if memory allocation failed
@@ -19,3 +19,5 @@ char* my_strdup(const char* s) {
     strcpy(duplicate, s);
     return duplicate;
 }
+
+

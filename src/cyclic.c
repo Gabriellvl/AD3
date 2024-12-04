@@ -7,6 +7,8 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "../include/utils.h"
+
 // Compare two substrings lexicographically using 64-bit words
 int compare_words(const char* s1, const char* s2, size_t len) {
     size_t i = 0;
@@ -72,7 +74,7 @@ size_t find_min_rotation(const char* doubled, size_t len) {
 
 char* lexicographically_minimal_string_rotation(const char* input) {
     if (!input || input[0] == '\0') {
-        return strdup("");
+        return my_strdup("");
     }
 
     size_t len = strlen(input);

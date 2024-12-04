@@ -8,6 +8,8 @@
 #include <string.h>
 #include <stdbool.h>
 
+#include "../include/utils.h"
+
 // Node structure for the compressed trie
 typedef struct TrieNode {
     char *substring;              // Compressed string for the node
@@ -31,7 +33,7 @@ TrieNode *trie_create_node(const char *substring) {
         exit(EXIT_FAILURE);
     }
 
-    node->substring = substring ? strdup(substring) : NULL;
+    node->substring = substring ? my_strdup(substring) : NULL;
     node->children = NULL;
     node->is_leaf = false;
     node->num_children = 0;
@@ -94,7 +96,7 @@ void trie_add_child(TrieNode *parent, TrieNode *child) {
 
 // Recursive helper function to add a word to the trie
 bool trie_add_recursive(TrieNode *node, const char *key) {
-    if (!*key) {  // If the key is empty, mark the node as a leaf
+    if (!key || !*key) {  // If the key is empty, mark the node as a leaf
         if (!node->is_leaf) {
             node->is_leaf = true;
             return true;
@@ -119,7 +121,15 @@ bool trie_add_recursive(TrieNode *node, const char *key) {
             split_node->capacity = child->capacity;
             split_node->is_leaf = child->is_leaf;
 
-            child->substring = strndup(child->substring, prefix_length);
+            free(child->substring);
+            child->substring = malloc(prefix_length + 1);
+            if (!child->substring) {
+                fprintf(stderr, "Memory allocation failed for split substring\n");
+                exit(EXIT_FAILURE);
+            }
+            memcpy(child->substring, key, prefix_length);
+            child->substring[prefix_length] = '\0';
+
             child->children = NULL;
             child->num_children = 0;
             child->capacity = 0;
