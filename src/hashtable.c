@@ -8,8 +8,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INITIAL_SIZE 8
-#define BUCKET_CAPACITY 4
+#define INITIAL_SIZE 1024
+#define BUCKET_CAPACITY 64
 
 struct Bucket
 {
@@ -61,6 +61,7 @@ size_t hashtable_size(HashTable *table) {
 }
 
 // djb2 hashfunctie
+// http://www.cse.yorku.ca/~oz/hash.html
 unsigned int hash(const char *key) {
     if (key == NULL || strlen(key) == 0)
     {

@@ -5,6 +5,7 @@
 #include "../include/searchtree.h"
 #include "../include/utils.h"
 #include <stdbool.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -42,6 +43,11 @@ Node* searchtree_create_node(const char* key, Color color, Node* parent) {
 // Function to initialize the search tree
 SearchTree* searchtree_init() {
     SearchTree* tree = malloc(sizeof(SearchTree));
+    if (!tree) {
+        fprintf(stderr, "Memory allocation failed for TrieNode\n");
+        exit(EXIT_FAILURE);
+    }
+
     tree->root = NULL;
     tree->size = 0;
     return tree;
@@ -148,6 +154,8 @@ void insert_fixup(SearchTree* tree, Node* z) {
 
 // Add a node to the Red-Black Tree
 bool searchtree_add(SearchTree* tree, const char* key) {
+    if (!tree || !key) return false;
+
     Node* y = NULL;
     Node* x = tree->root;
 
@@ -172,6 +180,8 @@ bool searchtree_add(SearchTree* tree, const char* key) {
 
 // Search for a key in the Red-Black Tree
 bool searchtree_search(const SearchTree* tree, const char* key) {
+    if (!tree || !key) return false;
+
     Node* x = tree->root;
     while (x) {
         int cmp = strcmp(key, x->key);
